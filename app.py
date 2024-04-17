@@ -68,7 +68,7 @@ def fetch_nyc_data(params):
         return {"message": f"Failed to fetch data => str({err})\n"}
 
 
-@app.route('/health_check')
+@app.route('/')
 def health_check():
     return "OK"
 
