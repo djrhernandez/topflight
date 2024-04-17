@@ -68,6 +68,11 @@ def fetch_nyc_data(params):
         return {"message": f"Failed to fetch data => str({err})\n"}
 
 
+@app.route('/health_check')
+def health_check():
+    return "OK"
+
+
 @app.route('/nyc_data', methods=["GET"])
 def check_nyc():
     params = request.args
