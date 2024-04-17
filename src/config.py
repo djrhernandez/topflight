@@ -3,6 +3,7 @@
 import os
 
 class Config:
+    # BACKEND_API = "https://topflight-0e1ab3703bed.herokuapp.com/"
     SECRET_KEY = os.environ.get("SECRET_KEY") or "secret_key"
     # SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:root@localhost/MyDB'
     SQLALCHEMY_DATABASE_URI = "sqlite:////home/path/to/app/src/skyhawk.db"
