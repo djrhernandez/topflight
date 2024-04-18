@@ -13,7 +13,6 @@ from src.config import Config
 from src.schema import schema
 from src.models import db_session, Hotels
 
-
 # Start client for NYC data.
 # NOTE: Unauth client only works with public data sets. Note 'None'
 # in place of application token, and no username or password.
@@ -93,6 +92,7 @@ def check_nyc():
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.remove()
+
 
 if __name__ == '__main__':
     app.run()
