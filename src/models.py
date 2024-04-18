@@ -1,13 +1,11 @@
 # models.py
 
-import os
 import logging
-from typing import List
-from typing import Optional
 from sqlalchemy import Column
-from sqlalchemy import String
-from sqlalchemy import Integer
 from sqlalchemy import ForeignKey
+from sqlalchemy import Integer
+from sqlalchemy import String
+from sqlalchemy import Table
 from sqlalchemy import create_engine
 from sqlalchemy import inspect
 from sqlalchemy.orm import Mapped
@@ -18,8 +16,6 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from .utils import create_db_path
 
-
-# Configure Python logging
 logging.basicConfig()
 logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 
@@ -32,6 +28,14 @@ db_session = scoped_session(
 
 Base = declarative_base()
 Base.query = db_session.query_property()
+
+association_table = Table(
+    "association",
+    Base.metadata,
+    Column("hotel_id", Integer, ForeignKey("hotels.parid")),
+    Column("owner_id", Integer, ForeignKey("owners.id")),
+)
+
 
 def inspect_tables():
     inspector = inspect(engine)
@@ -53,8 +57,7 @@ def inspect_hotels():
 
 
 class Hotels(Base):
-    __tablename__ = "hotel"
-    
+    __tablename__ = "hotels"
     parid = Column(Integer, primary_key=True)
     owner_name = Column(String, nullable=True)
     
@@ -80,70 +83,21 @@ class Hotels(Base):
     nta = Column(String, nullable=True)
     nta_code2 = Column(String, nullable=True)
     
-    
-    # owners = relationship("Owners")
-    # building_info = relationship('Building')
-    # tax_info = relationship('TaxInfo', backref=backref('hotel'))
-    # census_info = relationship('CensusInfo', backref=backref('hotel'))
+    def full_address(self):
+        return f"{self.street_num} {self.street_name}, {self.borough} {self.postcode}"
 
     def __repr__(self):
-        return f"<Hotel {self.id}>"
+        return f"<Hotel {self.id}, {self.full_address()}>"
 
 
-# class Owners(Base):
-#     __tablename__ = "owners"
-#     id = Column(Integer, primary_key=True)
-#     name = Column(String, nullable=True)
-#     # hotels = relationship("Hotel")
+class Owners(Base):
+    __tablename__ = "owners"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=True)
+    hotels = relationship("Hotels", secondary=association_table, backref="owners")
 
-#     def __repr__(self):
-#         return f"<Owner {self.name} ({self.id})>"
-
-
-# class Borough(Base):
-#     __tablename__ = 'borough'
-#     id = Column(Integer, primary_key=True)
-#     name = Column(String, nullable=True)
-#     borocode = Column(Integer, nullable=True)
-#     # hotels = relationship('HotelModel', backref=backref('borough_id'))
+    def __repr__(self):
+        return f"<Owner {self.name} ({self.id})>"
 
 
-# class Location(Base):
-#     __tablename__ = 'location'
-#     id = Column(Integer, primary_key=True)
-#     number = Column(String, nullable=True)
-#     name = Column(String, nullable=True)
-#     zipcode = Column(String, nullable=True)
-#     latitude = Column(Integer)
-#     longitude = Column(Integer)
-
-
-# class Building(Base):
-#     __tablename__ = 'building'
-#     id = Column(Integer, primary_key=True)
-#     bbl = Column(Integer, nullable=True)
-#     bin_number = Column(Integer, nullable=True)
-#     bdlg_class = Column(String, nullable=True)
-#     block = Column(Integer, nullable=True)
-#     lot = Column(Integer, nullable=True)
-
-
-# class TaxInfo(Base):
-#     __tablename__ = 'tax_info'
-#     id = Column(Integer, primary_key=True)
-#     # hotel_parid = Column(Integer, ForeignKey('hotels.parid'))
-#     tax_year = Column(Integer, nullable=True)
-#     tax_class = Column(Integer, nullable=True)
-
-
-# class CensusInfo(Base):
-#     __tablename__ = 'census_info'
-#     id = Column(Integer, primary_key=True)
-#     # hotel_parid = Column(Integer, ForeignKey('hotels.parid'))
-#     community_board = Column(Integer, nullable=True)
-#     council_district = Column(Integer, nullable=True)
-#     census_tract = Column(Integer, nullable=True)
-#     nta_name = Column(String, nullable=True)
-#     nta_code = Column(String, nullable=True)
-    
 Base.metadata.create_all(bind=engine)

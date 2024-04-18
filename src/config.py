@@ -9,11 +9,20 @@ class Config:
     SQLALCHEMY_DATABASE_URI = "sqlite:////home/path/to/app/src/skyhawk.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     CORS_HEADERS = "Content-Type"
-    NY_API_BASE_URL = "https://data.cityofnewyork.us"
     HEADERS = {
         "Accept": "application/json",
         "Content-Type": "application/json; charset=utf-8",
     }
-    NYC_PARAMS = {
-        '$limit' : '15',
+    NYC_API_BASE_URL = "data.cityofnewyork.us"
+    NYC_DATA_LIMIT = 20
+    GRAPHQL_QUERY = '''
+    query {
+        hotel {
+            parid
+            ownerName
+        }
+        owner {
+            id
+        }
     }
+    '''

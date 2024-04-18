@@ -3,7 +3,6 @@
 from flask import Flask, jsonify, request
 from flask_graphql import GraphQLView
 
-# import pandas as pd   # uncomment to use Pandas
 from sodapy import Socrata
 
 import urllib.parse as up
@@ -11,60 +10,69 @@ from urllib.parse import urlencode
 
 from src.config import Config
 from src.schema import schema
-from src.models import db_session, Hotels
+from src.models import db_session, Hotels, Owners
 
-# Start client for NYC data.
-# NOTE: Unauth client only works with public data sets. Note 'None'
-# in place of application token, and no username or password.
-# Example authenticated client (needed for non-public datasets):
-# client = Socrata(data.cityofnewyork.us, MyAppToken, username="user@example.com", password="SomePassword")
-client = Socrata("data.cityofnewyork.us", None)
+import logging
+logging.basicConfig(level=logging.INFO)
+
+# Unauth client only works with public data sets.
+# Visit the URL to use the auth client:
+# https://dev.socrata.com/foundry/data.cityofnewyork.us/tjus-cn27
+client = Socrata(Config.NYC_API_BASE_URL, None)
 
 app = Flask(__name__)
 app.debug = True
 
 app.add_url_rule(
     '/graphql',
-    view_func=GraphQLView.as_view(
+    view_func = GraphQLView.as_view(
         'graphql',
-        schema=schema,
-        graphiql=True # for having the GraphiQL interface
+        schema = schema,
+        graphiql = True, # for having the GraphiQL interface
+        default_query = Config.GRAPHQL_QUERY
     )
 )
 
 
-def fetch_nyc_data(params):
-    limits = params["$limit"]
+def fetch_nyc_data():
+    limits = Config.NYC_DATA_LIMIT
 
     try:
-        # NOTE: If you decide to use Panda module, you must remove the code
-        # below, uncomment the module and add this snippet:
-        # Convert to pandas DataFrame
-        # results = pd.DataFrame.from_records(response)
-        
-        # Client returns JSON results from the API.
-        # Converts to Python list of dictionaries with sodapy.
         response = client.get("tjus-cn27", limit=limits)
+        if not response:
+            logging.info("No data present in response.")
+            return []
 
-        if response:
-            if response:
-                for item in response:
-                    if item:
-                        existing_hotel = db_session.query(Hotels).filter_by(parid=item.get("parid")).first()
+        for item in response:
+            existing_hotel = db_session.query(Hotels).filter_by(parid=item.get("parid")).first()
+            existing_owner = db_session.query(Owners).filter_by(id=item.get("id")).first()
 
-                        if not existing_hotel:
-                            hotel = Hotels(**item) # pass all kv pairs as arguments for entry
-                            db_session.add(hotel)
-                        else:
-                            print(f"Entry already exists for Hotel ID: {item.get('parid')}")
-
-                db_session.commit()
+            if not existing_hotel:
+                hotel = Hotels(**item)
+                db_session.add(hotel)
             else:
-                print(f"No data present => response: {response}")
+                logging.info(f"Entry already exists for Hotel ID: {item.get('parid')}")
 
-            return response
+            if not existing_owner:
+                owner = Owners(
+                    name = item.get('owner_name')
+                )
+                db_session.add(owner)
+            else:
+                logging.info(f"Entry already exists for Owner ID: {item.get('id')}")
+
+        db_session.commit()
+        return response
     except Exception as err:
-        return {"message": f"Failed to fetch data => str({err})\n"}
+        db_session.rollback()
+        logging.error(f"Failed to fetch data: {err}", exc_info=True)
+        return {"message": f"Failed to fetch data: {str(err)}"}
+    finally:
+        db_session.close()
+
+
+with app.app_context():
+    fetch_nyc_data()
 
 
 @app.route('/')
@@ -74,12 +82,8 @@ def health_check():
 
 @app.route('/nyc_data', methods=["GET"])
 def check_nyc():
-    params = request.args
-    if not params:
-        params = Config.NYC_PARAMS
-
     try:
-        response = fetch_nyc_data(params)
+        response = fetch_nyc_data()
 
         if response:
             return jsonify({"message": "Data fetched successfully.", "data": response}), 200
@@ -90,7 +94,7 @@ def check_nyc():
 
 
 @app.teardown_appcontext
-def shutdown_session(exception=None):
+def teardown_db(Exception=None):
     db_session.remove()
 
 
