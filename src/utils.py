@@ -19,3 +19,4 @@ def prettify_dir(obj):
         obj.append((idx, attr))
         
     return obj
+
