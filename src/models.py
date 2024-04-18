@@ -11,7 +11,6 @@ from sqlalchemy import ForeignKey
 from sqlalchemy import create_engine
 from sqlalchemy import inspect
 from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker
