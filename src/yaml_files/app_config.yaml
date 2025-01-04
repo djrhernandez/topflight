@@ -1,0 +1,4 @@
+app_settings:
+  debug: true
+  log_level: "INFO"
+  secret_key: "s3cr3t"

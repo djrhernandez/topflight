@@ -1,0 +1,47 @@
+schema {
+	query: Query
+}
+
+type Query {
+	hotel(owner_name: String): [Hotel]
+	hotels(
+		bldg_class: [String], 
+		borocode: [Int],
+		borough: [String],
+		nta: [String],
+		owner_name: [String],
+		postcode: [Int],
+		tax_class: [String], 
+		tax_year: [Int]
+		): [Hotel]
+	hotelsByCouncilDistrict(council_district: [Int]!): [Hotel]
+	hotelsByParID(parid: Float!): [Hotel]
+	hotelsNearLocation(latitude: Float!, longitude: Float!, radius: Float!): [Hotel]
+}
+
+type Hotel {
+	parid: Float
+	bbl: Float
+	bldg_class: String
+	# TODO: Make this happen!
+	# bldg_class: {
+	# 	class: String
+	# 	description: String
+	# }
+	bldg_id_number: Int
+	block:  Int
+	borocode: Int
+	borough: String
+	census_tract: Int
+	community_board: Int
+	council_district: Int
+	latitude: Float
+	longitude: Float
+	lot: Int
+	nta: String
+	owner_name: String
+	postcode: Int
+	street_address: String
+	tax_class: String
+	tax_year: Int
+}
