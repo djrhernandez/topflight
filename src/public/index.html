@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<button onclick="getData()"> Retrieve the data</button>
+</body>
+
+<div id="dataDisplay">
+
+</div>
+
+<script>
+    function getData() {
+        const query = `
+        query Hotel($owner_name: String) {
+            hotel(owner_name: $owner_name) {
+                parid
+				owner_name
+				borough
+				borocode
+				bldg_class
+            }
+        }`;
+
+        const variables = {user_name: 'Will', city_name: 'NY'}
+
+        fetch('/graphql', {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                query: query,
+                variables: variables
+            })
+        }).then(res => res.json()).then(json => {
+            console.log(json);
+
+            const data = json.data.account;
+            const displayDiv = document.getElementById('dataDisplay');
+            displayDiv.innerHTML = `
+                <strong>Name:</strong> ${data.name} <br>
+                <strong>Age:</strong> ${data.age} <br>
+                <strong>Salary (NY):</strong> ${data.salary}
+            `;
+
+        })
+    }
+</script>
+</html>
