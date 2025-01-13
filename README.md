@@ -32,25 +32,26 @@ query fetchAllHotels {
   }
 }
 
-query fetchHotels($borough: [String]) {
-  hotel(borough: $borough) {
+query fetchHotelsNearLocation($latitude: Float!, $longitude: Float!, $radius: Float!) {
+  hotelsNearLocation(latitude: $latitude, longitude: $longitude, radius: $radius) {
     parid
-    block
-    borough
-    latitude
-    longitude
-    lot
-    nta
     owner_name
-    street_adress
-	}
+    borough
+    longitude
+    latitude
+    postcode
+    street_address
+  }
 }
 ```
 
-In Query Variables
+Examples for Query Variables:
 ```graphql
 {
-  "borough": "MANHATTAN"
-  "postcode": "10005"
+  "borough": "Manhattan",
+  "postcode": 10005,
+  "latitude": 40.705187,
+  "longitude": -74.006694,
+  "radius": 2.0
 }
 ```
