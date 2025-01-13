@@ -28,7 +28,6 @@ schema = make_executable_schema(type_defs, [queries.query, snake_case_fallback_r
 
 # Unauth client only works with public data sets.
 # URL to use the auth client: https://dev.socrata.com/foundry/data.cityofnewyork.us/tjus-cn27
-print(f"Config: {Config.NYC_API_BASE_URL} - {Config.NYC_API_SECRET_KEY}")
 soc_client = Socrata(Config.NYC_API_BASE_URL, Config.NYC_API_SECRET_KEY)
 
 
