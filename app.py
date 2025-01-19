@@ -1,4 +1,5 @@
 # app.py
+from flask_cors import CORS
 
 import atexit
 import logging
@@ -16,11 +17,9 @@ from src.routes import init_app
 from src.graphql import app, db, models, queries
 from src.utils import process_and_store_hotel_data
 
-
 # Basic logging for App and Scheduler
 logging.basicConfig(level=logging.INFO)
 logging.getLogger('apscheduler').setLevel(logging.INFO)
-
 
 # Make sure schema is defined
 type_defs = load_schema_from_path("src/graphql/schema.graphql")
@@ -28,7 +27,14 @@ schema = make_executable_schema(type_defs, [queries.query, snake_case_fallback_r
 
 # Unauth client only works with public data sets.
 # URL to use the auth client: https://dev.socrata.com/foundry/data.cityofnewyork.us/tjus-cn27
-soc_client = Socrata(Config.NYC_API_BASE_URL, Config.NYC_API_SECRET_KEY)
+soc_client = Socrata(Config.NYC_API_BASE_URL, Config.NYC_API_TOPFLIGHT_APP_TOKEN)
+if soc_client:
+    app.logger.info(
+        "Socrata client created - URI Prefix: '{uri_prefix:}' | Domain: '{domain:}' | Session: {session:}"
+        .format(**soc_client.__dict__)
+    )
+
+CORS(app, resources={r"/graphql": {"origins": Config.CORS_ORIGINS}})
 
 
 def fetch_nyc_data():
@@ -75,10 +81,10 @@ def start_scheduler():
         app.logger.info("Adding new job: fetch_nyc_data")
         scheduler.add_job(
             func=fetch_nyc_data,
-            trigger=IntervalTrigger(days=7),
+            trigger=IntervalTrigger(days=3),
             next_run_time=datetime.now() + timedelta(seconds=1),
             id='fetch_nyc_data',
-            name='Fetch NYC OpenData Hotel Info Every 7 Days',
+            name='Fetch NYC OpenData Hotel Info Every 3 Days',
             replace_existing=True
         )
     
@@ -88,7 +94,6 @@ def start_scheduler():
 
 # Initialize app and database
 init_app(app, schema, soc_client, db)
-
 
 if __name__ == '__main__':
     # configs = Config

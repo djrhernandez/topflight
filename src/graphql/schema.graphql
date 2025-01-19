@@ -5,10 +5,11 @@ schema {
 type Query {
 	hotel(owner_name: String): [Hotel]
 	hotels(
+		bldg_id_number: [Int]
 		bldg_class: [String], 
 		borocode: [Int],
 		borough: [String],
-		nta: [String],
+		nta_name: [String],
 		owner_name: [String],
 		postcode: [Int],
 		tax_class: [String], 
@@ -22,13 +23,13 @@ type Query {
 type Hotel {
 	parid: Float
 	bbl: Float
+	bldg_id_number: Int
 	bldg_class: String
 	# TODO: Make this happen!
 	# bldg_class: {
 	# 	class: String
 	# 	description: String
 	# }
-	bldg_id_number: Int
 	block:  Int
 	borocode: Int
 	borough: String
@@ -38,7 +39,8 @@ type Hotel {
 	latitude: Float
 	longitude: Float
 	lot: Int
-	nta: String
+	nta_code: String
+	nta_name: String
 	owner_name: String
 	postcode: Int
 	street_address: String

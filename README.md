@@ -16,7 +16,7 @@ pip install -r requirements.txt
 
 3. Finally, run the project
 ```bash
-flask --app app.py run
+python app.py
 ```
 
 ## GraphQL Queries
@@ -54,4 +54,14 @@ Examples for Query Variables:
   "longitude": -74.006694,
   "radius": 2.0
 }
+```
+
+---
+
+## Troubleshooting
+If you need to update the requirements.txt file so the app runs correctly, install and run the `pipreqs` command.
+For more info, check out the documentation for [pipreqs](https://pypi.org/project/pipreqs/):
+```bash
+pip install pipreqs
+pipreqs /path/to/app  # use --force if necessary
 ```

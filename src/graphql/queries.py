@@ -10,10 +10,12 @@ Query = QueryType()
 def resolve_hotels(
     obj, 
     info, 
+    bldg_id_number = None,
     bldg_class = None, 
     borocode = None, 
     borough = None, 
-    nta = None, 
+    nta_code = None,
+    nta_name = None,
     owner_name = None, 
     postcode = None, 
     tax_class = None, 
@@ -21,14 +23,18 @@ def resolve_hotels(
     
     query = Hotel.query
     
+    if bldg_id_number:
+        query = query.filter(Hotel.bldg_id_number.in_(bldg_id_number))
     if bldg_class:
         query = query.filter(Hotel.bldg_class.in_(bldg_class))
     if borocode:
         query = query.filter(Hotel.borocode.in_(borocode))
     if borough:
         query = query.filter(Hotel.borough.in_(borough))
-    if nta:
-        query = query.filter(Hotel.nta.in_(nta))
+    if nta_code:
+        query = query.filter(Hotel.nta_code.in_(nta_code))
+    if nta_name:
+        query = query.filter(Hotel.nta_name.in_(nta_name))
     if owner_name:
         query = query.filter(Hotel.owner_name.in_(owner_name))
     if postcode:
@@ -37,8 +43,9 @@ def resolve_hotels(
         query = query.filter(Hotel.tax_class.in_(tax_class))
     if tax_year:
         query = query.filter(Hotel.tax_year.in_(tax_year))
-
-    return [hotel.to_dict() for hotel in query.all()] 
+    
+    result = query.all()
+    return [hotel.to_dict() for hotel in result] 
 
 
 @Query.field("hotel")
