@@ -1,6 +1,6 @@
 # Topflight API
 
-Topflight is a Python backend that uses a GraphQL API along with Flask, Ariadne, and Socrata.
+Topflight is a Python backend that uses a GraphQL layer and is built with Flask, Ariadne, and Socrata. It fetches info from OpenData, Steam, and OpenAI (WIP).
 
 ## Installation
 1. Create and establish your Python virtualenv environment on the CMD line
@@ -15,8 +15,14 @@ pip install -r requirements.txt
 ```
 
 3. Finally, run the project
+For backend development & debugging:
 ```bash
 python app.py
+```
+
+When fetching info from the frontend:
+```bash
+flask --app app.py run
 ```
 
 ## GraphQL Queries

@@ -1,8 +1,9 @@
 # utils.py
-
 import os
+import requests
 from sqlalchemy import Null
 from math import radians, sin, cos, sqrt, atan2
+from src.graphql import app
 
 from .config import Config
 
@@ -99,3 +100,17 @@ def process_and_store_hotel_data(data, db, models):
         db.session.commit()
 
 
+def backup_fetch_nyc_data():
+    try:
+        response = requests.get(Config.NYC_API_BASE_URL + '/resource/tjus-cn27.json', headers=Config.HEADERS, params=Config.NYC_PARAMS)
+        if response.status_code == 200:
+            data = response.json()
+            app.logger.info(f"Successfully fetched {len(data)} records.")
+            return data
+        else:
+            app.logger.error(f"Failed to fetch data. Status code: {response.status_code}")
+            app.logger.error(f"Error message: {response.text}")
+            return None
+    except Exception as e:
+        app.logger.error(f"An error occurred: {e}")
+        return None

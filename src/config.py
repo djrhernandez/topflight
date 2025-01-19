@@ -29,6 +29,7 @@ class Config:
     HEADERS = {
         "Accept": "application/json",
         "Content-Type": "application/json; charset=utf-8",
+        "X-App-Token": os.environ.get("NYCOD_API_TOPFLIGHT_APP_TOKEN")
     }
     GRAPHQL_QUERY = '''
     query fetchAllHotels {
@@ -58,6 +59,10 @@ class Config:
     
     OPENAI_KEY = os.environ.get("OPENAI_KEY")
     
+    NYC_PARAMS = {
+        "$limit": NYC_API_DATA_LIMIT,
+    }
+    
     SECRET_KEY = os.environ.get("SECRET_KEY")
     
     SKYHAWK_URL = os.environ.get("SKYHAWK_DOMAIN_URL")
@@ -75,5 +80,3 @@ class Config:
     YAML_DATA = yaml_configs
     YAML_DATA_APP_SETTINGS = YAML_DATA.get('app_config', {}).get('app_settings', {})
     YAML_NYC_CONFIG_DATA = YAML_DATA.get('nyc_config', {}).get('nyc_data', {})
-    
-print(f"YAML Configs: {Config.YAML_NYC_CONFIG_DATA}")
