@@ -14,8 +14,8 @@ from sqlalchemy import inspect
 
 from src.config import Config
 from src.routes import init_app
-from src.graphql import app, db, models, queries
-from src.utils import process_and_store_hotel_data, backup_fetch_nyc_data
+from src.graphql import app, db, queries
+from src.utils import process_hotel_data
 
 # Basic logging for App and Scheduler
 logging.basicConfig(level=logging.INFO)
@@ -29,12 +29,11 @@ CORS(app, resources={r"/graphql": {"origins": Config.CORS_ORIGINS}})
 
 # Unauth client only works with public data sets.
 # URL to use the auth client: https://dev.socrata.com/foundry/data.cityofnewyork.us/tjus-cn27
-app_token = Config.NYC_API_TOPFLIGHT_APP_TOKEN
-soc_client = Socrata(Config.NYC_API_BASE_URL, app_token, timeout = 30)
+soc_client = Socrata(Config.NYCOD_API_BASE_URL, Config.NYCOD_API_TOPFLIGHT_APP_TOKEN, timeout = 30)
 if soc_client:
     app.logger.info(
-        "Socrata client created - URI Prefix: '{uri_prefix:}' | Domain: '{domain:}' | Session: {session:} | APP Token: {app_token}"
-        .format(**soc_client.__dict__, app_token = app_token)
+        "Socrata client created - URI Prefix: '{uri_prefix:}' | Domain: '{domain:}' | Session: {session:}"
+        .format(**soc_client.__dict__)
     )
 else:
     app.logger.error("Failed to create Socrata client. Exiting.")
@@ -44,26 +43,19 @@ else:
 def fetch_nyc_data():
     with app.app_context():
         try:
-            response = soc_client.get("tjus-cn27", limit=2)
-            if not response:
-                app.logger.warning("No data returned from NYC API.\n")
-                return False
-
-            process_and_store_hotel_data(response, db, models)
-            app.logger.info("NYC data loaded into the database.\n")
-        
+            response = soc_client.get("tjus-cn27", limit=Config.NYCOD_API_DATA_LIMIT)
+            if response:
+                hotel_data = process_hotel_data(response)
+                app.logger.info(f"NYC data loaded into the database. Successfully fetched {hotel_data} records.\n")
+                return True
         except SystemError as err:
             app.logger.error(f"SystemError - fetch_nyc_data(): {err}\n")
-            return False
         except Exception as err:
             app.logger.error(f"Exception - fetch_nyc_data(): {err}\n")
-            return False
         except BaseException as err:
             app.logger.error(f"BaseException - fetch_nyc_data(): {err}\n")
-            return False
         
-        app.logger.info("Fetching NYC data done.\n")
-        return True
+        return False
 
 
 def initialize_db():
@@ -77,14 +69,8 @@ def initialize_db():
             app.logger.info("Fetching data from NYC API...")
             data_fetched = fetch_nyc_data()
             if not data_fetched:
-                app.logger.error("Failed to fetch data from NYC API. Retrying from backup protocols...")
-                
-                backup_fetched = backup_fetch_nyc_data()
-                if not backup_fetched:
-                    app.logger.error("Failed to refetch data from backup protocols. Exiting..")
-                    exit(1)
-                else:
-                    process_and_store_hotel_data(backup_fetched, db, models)
+                app.logger.error("Failed to fetch data from NYC API. Exiting..")
+                exit(1)
         else:
             app.logger.info("Hotel table already exists.")
 

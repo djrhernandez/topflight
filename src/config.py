@@ -47,20 +47,20 @@ class Config:
         }
     }
     '''
-    NYC_API_BASE_URL = os.environ.get("NYCOD_API_BASE_URL")
-    NYC_API_DATA_LIMIT = int(os.environ.get("NYCOD_API_DATA_LIMIT", 20000 if ENV == "production" else 200))
-    NYC_API_KEY_ID = os.environ.get("NYCOD_API_KEY_ID")
-    NYC_API_SECRET_KEY = os.environ.get("NYCOD_API_SECRET")
-    NYC_API_USERNAME = os.environ.get("NYCOD_API_USERNAME")
-    NYC_API_PASSWORD = os.environ.get("NYCOD_API_PASSWORD")
-    NYC_API_TOPFLIGHT_APP_TOKEN = os.environ.get("NYCOD_API_TOPFLIGHT_APP_TOKEN")
-    NYC_API_TOPFLIGHT_KEY_ID = os.environ.get("NYCOD_API_TOPFLIGHT_KEY_ID")
-    NYC_API_TOPFLIGHT_SECRET_KEY = os.environ.get("NYCOD_API_TOPFLIGHT_SECRET")
+    NYCOD_API_BASE_URL = os.environ.get("NYCOD_API_BASE_URL")
+    NYCOD_API_DATA_LIMIT = int(os.environ.get("NYCOD_API_DATA_LIMIT", 20000 if ENV == "production" else 200))
+    NYCOD_API_USERNAME = os.environ.get("NYCOD_API_USERNAME")
+    NYCOD_API_PASSWORD = os.environ.get("NYCOD_API_PASSWORD")
+    
+    NYCOD_API_KEY_ID = os.environ.get("NYCOD_API_TF_KEY_ID")
+    NYCOD_API_SECRET_KEY = os.environ.get("NYCOD_API_TF_SECRET_KEY")
+    NYCOD_API_TOPFLIGHT_APP_TOKEN = os.environ.get("NYCOD_API_TF_APP_TOKEN")
+    NYCOD_API_TOPFLIGHT_APP_TOKEN_SECRET = os.environ.get("NYCOD_API_TF_APP_TOKEN_SECRET")
     
     OPENAI_KEY = os.environ.get("OPENAI_KEY")
     
-    NYC_PARAMS = {
-        "$limit": NYC_API_DATA_LIMIT,
+    NYCOD_PARAMS = {
+        "$limit": NYCOD_API_DATA_LIMIT,
     }
     
     SECRET_KEY = os.environ.get("SECRET_KEY")

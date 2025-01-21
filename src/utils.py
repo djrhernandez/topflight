@@ -3,7 +3,7 @@ import os
 import requests
 from sqlalchemy import Null
 from math import radians, sin, cos, sqrt, atan2
-from src.graphql import app
+from src.graphql import app, db, models
 
 from .config import Config
 
@@ -57,7 +57,7 @@ def get_borough(hotel_data, borocode):
     return borough
 
 
-def create_hotel_record(hotel_data, models):
+def create_hotel_record(hotel_data):
     street_address = f"{hotel_data.get('street_num', '')} {hotel_data.get('street_name', '')}"
     
     return models.Hotel(
@@ -84,33 +84,23 @@ def create_hotel_record(hotel_data, models):
     )
 
 
-def process_and_store_hotel_data(data, db, models):
-    parids = [int(hotel_data.get('parid', 0)) for hotel_data in data]
-    existing_hotels = {hotel.parid: hotel for hotel in models.Hotel.query.filter(models.Hotel.parid.in_(parids)).all()}
+def process_hotel_data(data):
+    parids = {int(hotel_data.get('parid', 0)) for hotel_data in data}
+    existing_hotels = {hotel.parid: hotel for hotel in db.session.query(models.Hotel).filter(models.Hotel.parid.in_(parids)).all()}
     
     new_hotels = []
     for hotel_data in data:
         parid = int(hotel_data.get('parid', 0))
         if parid not in existing_hotels:
-            hotel = create_hotel_record(hotel_data, models)
-            new_hotels.append(hotel)
+            new_hotel = create_hotel_record(hotel_data)
+            new_hotels.append(new_hotel)
     
     if new_hotels:
-        db.session.bulk_save_objects(new_hotels)
-        db.session.commit()
-
-
-def backup_fetch_nyc_data():
-    try:
-        response = requests.get(Config.NYC_API_BASE_URL + '/resource/tjus-cn27.json', headers=Config.HEADERS, params=Config.NYC_PARAMS)
-        if response.status_code == 200:
-            data = response.json()
-            app.logger.info(f"Successfully fetched {len(data)} records.")
-            return data
-        else:
-            app.logger.error(f"Failed to fetch data. Status code: {response.status_code}")
-            app.logger.error(f"Error message: {response.text}")
-            return None
-    except Exception as e:
-        app.logger.error(f"An error occurred: {e}")
-        return None
+        try:
+            db.session.bulk_save_objects(new_hotels)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"An error occurred while saving new hotels: {e}")
+    
+    return len(new_hotels)
