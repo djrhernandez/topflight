@@ -1,7 +1,6 @@
 from ariadne import graphql_sync
 from ariadne.explorer import ExplorerGraphiQL
 from flask import jsonify, request
-from app import logger
 
 def init_app(app, schema, client, db, logger):
     @app.before_request

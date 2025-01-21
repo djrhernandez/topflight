@@ -97,7 +97,7 @@ def start_scheduler():
 
 
 # Initialize app and database
-init_app(app, schema, soc_client, db)
+init_app(app, schema, soc_client, db, logger)
 
 if __name__ == '__main__':
     initialize_db()
