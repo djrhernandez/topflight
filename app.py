@@ -17,15 +17,14 @@ from src.routes import init_app
 from src.graphql import app, db, queries
 from src.utils import process_hotel_data
 
-# Basic logging for App and Scheduler
-logging.basicConfig(level=logging.INFO)
-logging.getLogger('apscheduler').setLevel(logging.INFO)
-
-# Make sure schema is defined
+# Define schema first
 type_defs = load_schema_from_path("src/graphql/schema.graphql")
 schema = make_executable_schema(type_defs, [queries.query, snake_case_fallback_resolvers])
 
-CORS(app, resources={r"/graphql": {"origins": Config.CORS_ORIGINS}})
+# Configuring logging for App and Scheduler
+logging.basicConfig(level=logging.INFO)
+logging.getLogger('apscheduler').setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Unauth client only works with public data sets.
 # URL to use the auth client: https://dev.socrata.com/foundry/data.cityofnewyork.us/tjus-cn27
