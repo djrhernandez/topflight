@@ -5,14 +5,13 @@ from flask import jsonify, request
 def init_app(app, schema, client, db, logger):
     @app.before_request
     def log_request_info():
-        logger.info(f"Incoming request: {request.method} {request.path}")
-        logger.info(f"Headers: {request.headers}")
-        logger.info(f"Body: {request.get_data()}")
+        logger.info(f"Incoming request: {request}")
     
     
     @app.route('/')
     def health_check():
-        return "OK :)"
+        data = { "status": "OK :)" }
+        return jsonify(data), 200
 
 
     @app.route("/graphql", methods=["GET"])
