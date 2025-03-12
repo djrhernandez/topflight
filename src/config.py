@@ -39,15 +39,25 @@ class Config:
     query fetchAllHotels {
         hotels {
             parid
+            bbl  
             bldg_class
+            bldg_id_number
+            block
             borocode
             borough
+            census_tract
+            community_board
+            council_district
             latitude
             longitude
-            nta
+            lot
+            nta_code
+            nta_name
             owner_name
             postcode
             street_address
+            tax_class
+            tax_year
         }
     }
     '''
