@@ -23,11 +23,6 @@ class Config:
         4: 'Queens',
         5: 'Staten Island'
     }
-    CORS_ORIGINS = {
-        'origin': os.environ.get("CORS_ORIGINS"),
-        'methods': '*',
-        'allow_headers': '*',
-    }
     DEBUG = True
     ENV = os.environ.get('ENV')  # Defaulting to production for obvious reasons
     HEADERS = {
